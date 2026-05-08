@@ -22,8 +22,8 @@ public class Task {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "uuid", nullable = false)
-    private String uuid = UUID.randomUUID().toString();
+    @Column(name = "uuid", nullable = false, updatable = false)
+    private UUID uuid = UUID.randomUUID();
 
     @Column(name = "title", nullable = false)
     private String title;
@@ -31,8 +31,8 @@ public class Task {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "due_ts", nullable = false)
-    private OffsetDateTime dueTimestamp;
+    @Column(name = "due_at", nullable = false)
+    private OffsetDateTime dueAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
