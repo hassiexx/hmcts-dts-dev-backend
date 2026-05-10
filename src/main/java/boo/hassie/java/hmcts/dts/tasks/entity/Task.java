@@ -1,6 +1,7 @@
 package boo.hassie.java.hmcts.dts.tasks.entity;
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,11 +19,11 @@ import java.util.UUID;
 @Setter
 public class Task {
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
-    @Column(name = "uuid", nullable = false, updatable = false)
+    @Column(name = "uuid", nullable = false, unique = true, updatable = false)
     private UUID uuid = UUID.randomUUID();
 
     @Column(name = "title", nullable = false)

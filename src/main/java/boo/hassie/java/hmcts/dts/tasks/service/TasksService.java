@@ -1,0 +1,35 @@
+package boo.hassie.java.hmcts.dts.tasks.service;
+
+import boo.hassie.java.hmcts.dts.tasks.dto.CreateTaskRequest;
+import boo.hassie.java.hmcts.dts.tasks.dto.TaskDTO;
+import boo.hassie.java.hmcts.dts.tasks.entity.Task;
+import boo.hassie.java.hmcts.dts.tasks.mapper.TaskMapper;
+import boo.hassie.java.hmcts.dts.tasks.repository.TasksRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class TasksService {
+    private final TasksRepository tasksRepository;
+
+    @Autowired
+    public TasksService(final TasksRepository tasksRepository) {
+        this.tasksRepository = tasksRepository;
+    }
+
+    /**
+     * Creates a new task.
+     *
+     * @param request the request object.
+     * @return the created task.
+     */
+    public TaskDTO createTask(final CreateTaskRequest request) {
+        var task = new Task();
+        task.setTitle(request.getTitle());
+        task.setDescription(request.getDescription());
+        task.setDueAt(request.getDueAt());
+        task = tasksRepository.save(task);
+
+        return TaskMapper.INSTANCE.toDTO(task);
+    }
+}

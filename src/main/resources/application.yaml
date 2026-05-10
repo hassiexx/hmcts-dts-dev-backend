@@ -1,0 +1,8 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: tasks-api
+  jackson:
+    property-naming-strategy: SNAKE_CASE
