@@ -6,7 +6,7 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -32,7 +32,7 @@ public class Task {
     private String description;
 
     @Column(name = "due_at", nullable = false)
-    private OffsetDateTime dueAt;
+    private LocalDateTime dueAt;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -40,9 +40,9 @@ public class Task {
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt;
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
+    private LocalDateTime updatedAt;
 }
