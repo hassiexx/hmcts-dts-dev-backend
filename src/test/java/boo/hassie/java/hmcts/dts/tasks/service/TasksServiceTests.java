@@ -15,6 +15,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -109,5 +111,54 @@ public class TasksServiceTests {
         Mockito.when(tasksRepository.findTaskByUuid(uuid)).thenReturn(null);
 
         Assertions.assertThrows(NotFoundException.class, () -> tasksService.getTask(uuid));
+    }
+
+    @Test
+    public void testGetTasks() {
+        // Arrange
+        final var tasks = getTestTasks();
+        final var orderedTasks = tasks.stream()
+                .sorted(Comparator.comparing(Task::getCreatedAt).reversed())
+                .toList();
+
+        Mockito.when(tasksRepository.findAllByOrderByCreatedAtDesc()).thenReturn(orderedTasks);
+
+        // Act
+        List<TaskDTO> foundTasks = tasksService.getTasks();
+
+        // Assert
+        Assertions.assertEquals(tasks.size(), foundTasks.size());
+        Assertions.assertEquals("Task 2", foundTasks.getFirst().getTitle());
+        for (var i = 0; i < orderedTasks.size(); i++) {
+            final var task = orderedTasks.get(i);
+            final var foundTask = foundTasks.get(i);
+
+            Assertions.assertEquals(task.getUuid(), foundTask.getUuid());
+            Assertions.assertEquals(task.getTitle(), foundTask.getTitle());
+            Assertions.assertEquals(task.getDescription(), foundTask.getDescription());
+            Assertions.assertEquals(task.getDueAt(), foundTask.getDueAt());
+            Assertions.assertEquals(task.getStatus(), foundTask.getStatus());
+            Assertions.assertEquals(task.getUpdatedAt(), foundTask.getUpdatedAt());
+        }
+    }
+
+    private List<Task> getTestTasks() {
+        final var task1 = new Task();
+        task1.setTitle("Task 1");
+        task1.setDescription("Task 1 desc");
+        task1.setStatus(Status.COMPLETED);
+        task1.setDueAt(LocalDateTime.now().plusDays(2));
+        task1.setCreatedAt(LocalDateTime.now().minusDays(4));
+        task1.setUpdatedAt(LocalDateTime.now().minusHours(2));
+
+        final var task2 = new Task();
+        task2.setTitle("Task 2");
+        task2.setDescription("Task 2 desc");
+        task2.setStatus(Status.IN_PROGRESS);
+        task2.setDueAt(LocalDateTime.now().plusDays(1));
+        task2.setCreatedAt(LocalDateTime.now().minusDays(2));
+        task2.setUpdatedAt(LocalDateTime.now().minusDays(1));
+
+        return List.of(task1, task2);
     }
 }

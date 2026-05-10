@@ -7,8 +7,10 @@ import boo.hassie.java.hmcts.dts.tasks.exception.NotFoundException;
 import boo.hassie.java.hmcts.dts.tasks.mapper.TaskMapper;
 import boo.hassie.java.hmcts.dts.tasks.repository.TasksRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Streamable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -38,6 +40,7 @@ public class TasksService {
 
     /**
      * Deletes a task.
+     *
      * @param uuid the UUID of the task.
      * @throws NotFoundException if the task was not found.
      */
@@ -51,6 +54,7 @@ public class TasksService {
 
     /**
      * Gets a task.
+     *
      * @param uuid the UUID of the task.
      * @return the task if found.
      * @throws NotFoundException if the task was not found.
@@ -63,5 +67,18 @@ public class TasksService {
         }
 
         return TaskMapper.INSTANCE.toDTO(task);
+    }
+
+    /**
+     * Gets all tasks.
+     *
+     * @return a list of tasks.
+     */
+    public List<TaskDTO> getTasks() {
+        final var tasks = tasksRepository.findAllByOrderByCreatedAtDesc();
+
+        return Streamable.of(tasks)
+                .map(TaskMapper.INSTANCE::toDTO)
+                .toList();
     }
 }
