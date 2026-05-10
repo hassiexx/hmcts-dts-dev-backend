@@ -3,10 +3,13 @@ package boo.hassie.java.hmcts.dts.tasks.service;
 import boo.hassie.java.hmcts.dts.tasks.dto.CreateTaskRequest;
 import boo.hassie.java.hmcts.dts.tasks.dto.TaskDTO;
 import boo.hassie.java.hmcts.dts.tasks.entity.Task;
+import boo.hassie.java.hmcts.dts.tasks.exception.NotFoundException;
 import boo.hassie.java.hmcts.dts.tasks.mapper.TaskMapper;
 import boo.hassie.java.hmcts.dts.tasks.repository.TasksRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class TasksService {
@@ -31,5 +34,18 @@ public class TasksService {
         task = tasksRepository.save(task);
 
         return TaskMapper.INSTANCE.toDTO(task);
+    }
+
+    /**
+     * Deletes a task.
+     * @param uuid the UUID of the task.
+     * @throws NotFoundException if the task was not found.
+     */
+    public void deleteTask(final UUID uuid) throws NotFoundException {
+        if (!tasksRepository.existsByUuid(uuid)) {
+            throw new NotFoundException();
+        }
+
+        tasksRepository.deleteByUuid(uuid);
     }
 }

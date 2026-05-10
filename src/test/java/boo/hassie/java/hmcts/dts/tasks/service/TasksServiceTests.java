@@ -2,6 +2,7 @@ package boo.hassie.java.hmcts.dts.tasks.service;
 
 import boo.hassie.java.hmcts.dts.tasks.dto.CreateTaskRequest;
 import boo.hassie.java.hmcts.dts.tasks.entity.Task;
+import boo.hassie.java.hmcts.dts.tasks.exception.NotFoundException;
 import boo.hassie.java.hmcts.dts.tasks.repository.TasksRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
 public class TasksServiceTests {
@@ -49,5 +51,22 @@ public class TasksServiceTests {
         Assertions.assertEquals(task.getDueAt(), taskDTO.getDueAt());
         Assertions.assertEquals(task.getStatus(), taskDTO.getStatus());
         Assertions.assertEquals(task.getUpdatedAt(), taskDTO.getUpdatedAt());
+    }
+
+    @Test
+    public void testDeleteTask() {
+        final UUID uuid = UUID.randomUUID();
+        Mockito.when(tasksRepository.existsByUuid(uuid)).thenReturn(true);
+
+        Assertions.assertDoesNotThrow(() -> tasksService.deleteTask(uuid));
+        Mockito.verify(tasksRepository, Mockito.times(1)).deleteByUuid(uuid);
+    }
+
+    @Test
+    public void testDeleteTask_TaskDoesNotExist() {
+        final UUID uuid = UUID.randomUUID();
+        Mockito.when(tasksRepository.existsByUuid(uuid)).thenReturn(false);
+
+        Assertions.assertThrows(NotFoundException.class, () -> tasksService.deleteTask(uuid));
     }
 }
