@@ -15,6 +15,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -140,6 +141,15 @@ public class TasksServiceTests {
             Assertions.assertEquals(task.getStatus(), foundTask.getStatus());
             Assertions.assertEquals(task.getUpdatedAt(), foundTask.getUpdatedAt());
         }
+    }
+
+    @Test
+    public void testGetTasks_NoTasksExist() {
+        Mockito.when(tasksRepository.findAllByOrderByCreatedAtDesc()).thenReturn(new ArrayList<>());
+
+        var foundTasks = tasksService.getTasks();
+
+        Assertions.assertTrue(foundTasks.isEmpty());
     }
 
     private List<Task> getTestTasks() {
