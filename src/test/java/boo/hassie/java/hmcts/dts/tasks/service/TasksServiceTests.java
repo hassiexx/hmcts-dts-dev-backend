@@ -1,6 +1,8 @@
 package boo.hassie.java.hmcts.dts.tasks.service;
 
 import boo.hassie.java.hmcts.dts.tasks.dto.CreateTaskRequest;
+import boo.hassie.java.hmcts.dts.tasks.dto.TaskDTO;
+import boo.hassie.java.hmcts.dts.tasks.entity.Status;
 import boo.hassie.java.hmcts.dts.tasks.entity.Task;
 import boo.hassie.java.hmcts.dts.tasks.exception.NotFoundException;
 import boo.hassie.java.hmcts.dts.tasks.repository.TasksRepository;
@@ -14,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 @ExtendWith(MockitoExtension.class)
 public class TasksServiceTests {
@@ -55,7 +58,7 @@ public class TasksServiceTests {
 
     @Test
     public void testDeleteTask() {
-        final UUID uuid = UUID.randomUUID();
+        final var uuid = UUID.randomUUID();
         Mockito.when(tasksRepository.existsByUuid(uuid)).thenReturn(true);
 
         Assertions.assertDoesNotThrow(() -> tasksService.deleteTask(uuid));
@@ -64,9 +67,47 @@ public class TasksServiceTests {
 
     @Test
     public void testDeleteTask_TaskDoesNotExist() {
-        final UUID uuid = UUID.randomUUID();
+        final var uuid = UUID.randomUUID();
         Mockito.when(tasksRepository.existsByUuid(uuid)).thenReturn(false);
 
         Assertions.assertThrows(NotFoundException.class, () -> tasksService.deleteTask(uuid));
+    }
+
+    @Test
+    public void testGetTask() {
+        // Arrange.
+        final var now = LocalDateTime.now();
+        final var task = new Task();
+        task.setTitle("Example title");
+        task.setDescription("Example description");
+        task.setDueAt(now.plusDays(10));
+        task.setStatus(Status.IN_PROGRESS);
+        task.setUpdatedAt(now.minusDays(1));
+
+        Mockito.when(tasksRepository.findTaskByUuid(task.getUuid())).thenReturn(task);
+
+        // Act.
+        AtomicReference<TaskDTO> foundTaskAtomic = new AtomicReference<>();
+        Assertions.assertDoesNotThrow(() -> {
+            foundTaskAtomic.set(tasksService.getTask(task.getUuid()));
+        });
+
+        // Assert.
+        final var foundTask = foundTaskAtomic.get();
+        Assertions.assertEquals(task.getUuid(), foundTask.getUuid());
+        Assertions.assertEquals(task.getTitle(), foundTask.getTitle());
+        Assertions.assertEquals(task.getDescription(), foundTask.getDescription());
+        Assertions.assertEquals(task.getDueAt(), foundTask.getDueAt());
+        Assertions.assertEquals(task.getStatus(), foundTask.getStatus());
+        Assertions.assertEquals(task.getUpdatedAt(), foundTask.getUpdatedAt());
+    }
+
+    @Test
+    public void testGetTask_TaskDoesNotExist() {
+        final var uuid = UUID.randomUUID();
+
+        Mockito.when(tasksRepository.findTaskByUuid(uuid)).thenReturn(null);
+
+        Assertions.assertThrows(NotFoundException.class, () -> tasksService.getTask(uuid));
     }
 }

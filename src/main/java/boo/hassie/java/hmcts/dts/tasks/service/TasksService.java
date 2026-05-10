@@ -48,4 +48,20 @@ public class TasksService {
 
         tasksRepository.deleteByUuid(uuid);
     }
+
+    /**
+     * Gets a task.
+     * @param uuid the UUID of the task.
+     * @return the task if found.
+     * @throws NotFoundException if the task was not found.
+     */
+    public TaskDTO getTask(final UUID uuid) throws NotFoundException {
+        final Task task = tasksRepository.findTaskByUuid(uuid);
+
+        if (task == null) {
+            throw new NotFoundException();
+        }
+
+        return TaskMapper.INSTANCE.toDTO(task);
+    }
 }
