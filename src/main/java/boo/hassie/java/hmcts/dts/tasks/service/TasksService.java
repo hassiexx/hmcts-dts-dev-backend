@@ -44,7 +44,7 @@ public class TasksService {
      * @param uuid the UUID of the task.
      * @throws NotFoundException if the task was not found.
      */
-    public void deleteTask(final UUID uuid) throws NotFoundException {
+    public void deleteTask(final UUID uuid) {
         if (!tasksRepository.existsByUuid(uuid)) {
             throw new NotFoundException();
         }
@@ -59,7 +59,7 @@ public class TasksService {
      * @return the task if found.
      * @throws NotFoundException if the task was not found.
      */
-    public TaskDTO getTask(final UUID uuid) throws NotFoundException {
+    public TaskDTO getTask(final UUID uuid) {
         final Task task = tasksRepository.findTaskByUuid(uuid);
 
         if (task == null) {
