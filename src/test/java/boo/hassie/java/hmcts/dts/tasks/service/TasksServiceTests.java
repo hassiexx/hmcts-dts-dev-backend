@@ -2,13 +2,16 @@ package boo.hassie.java.hmcts.dts.tasks.service;
 
 import boo.hassie.java.hmcts.dts.tasks.dto.CreateTaskRequest;
 import boo.hassie.java.hmcts.dts.tasks.dto.TaskDTO;
+import boo.hassie.java.hmcts.dts.tasks.dto.UpdateTaskRequest;
 import boo.hassie.java.hmcts.dts.tasks.entity.Status;
 import boo.hassie.java.hmcts.dts.tasks.entity.Task;
+import boo.hassie.java.hmcts.dts.tasks.exception.BadRequestException;
 import boo.hassie.java.hmcts.dts.tasks.exception.NotFoundException;
 import boo.hassie.java.hmcts.dts.tasks.repository.TasksRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -147,9 +150,83 @@ public class TasksServiceTests {
     public void testGetTasks_NoTasksExist() {
         Mockito.when(tasksRepository.findAllByOrderByCreatedAtDesc()).thenReturn(new ArrayList<>());
 
-        var foundTasks = tasksService.getTasks();
+        final var foundTasks = tasksService.getTasks();
 
         Assertions.assertTrue(foundTasks.isEmpty());
+    }
+
+    @Test
+    public void testUpdateTask() {
+        // Arrange
+        final Task task = new Task();
+        task.setTitle("Task title");
+        task.setDescription("Example task description");
+
+        Mockito.when(tasksRepository.findTaskByUuid(task.getUuid())).thenReturn(task);
+
+        // Act
+        final UpdateTaskRequest request = UpdateTaskRequest.builder()
+                .title("New title")
+                .description("New description")
+                .status(Status.COMPLETED)
+                .build();
+
+        tasksService.updateTask(task.getUuid(), request);
+
+        // Assert
+        final ArgumentCaptor<Task> captor = ArgumentCaptor.forClass(Task.class);
+        Mockito.verify(tasksRepository, Mockito.times(1)).save(captor.capture());
+
+        Assertions.assertEquals(task.getUuid(), captor.getValue().getUuid());
+        Assertions.assertEquals(request.getTitle(), captor.getValue().getTitle());
+        Assertions.assertEquals(request.getDescription(), captor.getValue().getDescription());
+        Assertions.assertEquals(request.getStatus(), captor.getValue().getStatus());
+    }
+
+    @Test
+    public void testUpdateTask_OneFieldInRequest() {
+        // Arrange
+        final var task = new Task();
+        task.setTitle("Task title");
+        task.setDescription("Example task description");
+
+        Mockito.when(tasksRepository.findTaskByUuid(task.getUuid())).thenReturn(task);
+
+        // Act
+        final var request = UpdateTaskRequest.builder()
+                .status(Status.COMPLETED)
+                .build();
+
+        tasksService.updateTask(task.getUuid(), request);
+
+        // Assert
+        final var captor = ArgumentCaptor.forClass(Task.class);
+        Mockito.verify(tasksRepository, Mockito.times(1)).save(captor.capture());
+
+        Assertions.assertEquals(task.getUuid(), captor.getValue().getUuid());
+        Assertions.assertEquals(task.getTitle(), captor.getValue().getTitle());
+        Assertions.assertEquals(task.getDescription(), captor.getValue().getDescription());
+        Assertions.assertEquals(request.getStatus(), captor.getValue().getStatus());
+    }
+
+    @Test
+    public void testUpdateTask_TaskDoesNotExist() {
+        final var uuid = UUID.randomUUID();
+        final var request = UpdateTaskRequest.builder()
+                .title("New title")
+                .build();
+
+        Mockito.when(tasksRepository.findTaskByUuid(uuid)).thenReturn(null);
+
+        Assertions.assertThrows(NotFoundException.class, () -> tasksService.updateTask(uuid, request));
+    }
+
+    @Test
+    public void testUpdateTask_AllFieldsInRequestNull() {
+        final var uuid = UUID.randomUUID();
+        final var request = new UpdateTaskRequest();
+
+        Assertions.assertThrows(BadRequestException.class, () -> tasksService.updateTask(uuid, request));
     }
 
     private List<Task> getTestTasks() {
