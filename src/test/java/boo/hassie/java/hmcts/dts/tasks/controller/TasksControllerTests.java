@@ -155,18 +155,48 @@ public class TasksControllerTests {
                         Matchers.is("Invalid UUID string: test123")));
     }
 
-//    @Test
-//    public void testGetTask() throws Exception {
-//        final var task = TaskDTO.builder()
-//                .title("Task title")
-//                .description("Task description")
-//                .status(Status.COMPLETED)
-//                .dueAt(LocalDateTime.now().plusDays(1))
-//                .updatedAt(LocalDateTime.now().minusDays(1))
-//                        .build();
-//
-//        Mockito.when(tasksService.getTask(task.getUuid())).thenReturn(task);
-//
-//        final var result = mockMvc.perform()
-//    }
+    @Test
+    public void testGetTask() throws Exception {
+        final var task = TaskDTO.builder()
+                .uuid(UUID.randomUUID())
+                .title("Task title")
+                .description("Task description")
+                .status(Status.COMPLETED)
+                .dueAt(LocalDateTime.now().plusDays(1))
+                .updatedAt(LocalDateTime.now().minusDays(1))
+                .build();
+
+        Mockito.when(tasksService.getTask(task.getUuid())).thenReturn(task);
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + task.getUuid()));
+
+        result.andExpect(MockMvcResultMatchers.status().isOk());
+        Assertions.assertEquals(task,
+                mapper.readValue(result.andReturn().getResponse().getContentAsByteArray(), TaskDTO.class));
+    }
+
+    @Test
+    public void testGetTask_TaskDoesNotExist() throws Exception {
+        final UUID uuid = UUID.randomUUID();
+        Mockito.doThrow(new NotFoundException("task not found")).when(tasksService).getTask(uuid);
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + uuid));
+
+        result.andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("task not found")));
+    }
+
+    @Test
+    public void testGetTask_InvalidUUID() throws Exception {
+        final var uuid = "test123";
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + uuid));
+
+        result.andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Bad request")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details.length()", Matchers.is(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details[0].param", Matchers.is("uuid")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details[0].reason",
+                        Matchers.is("Invalid UUID string: test123")));
+    }
 }

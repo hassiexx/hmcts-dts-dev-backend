@@ -22,8 +22,17 @@ public interface TasksOperations {
     @ApiResponses({
             @ApiResponse(responseCode = "204", description = "Success"),
             @ApiResponse(responseCode = "400", description = "Bad request"),
-            @ApiResponse(responseCode = "404", description = "task not found"),
+            @ApiResponse(responseCode = "404", description = "Task not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     ResponseEntity<?> deleteTask(@Parameter(description = "the uuid of the task") UUID uuid);
+
+    @Operation(summary = "Get task", description = "Gets a task by UUID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Success"),
+            @ApiResponse(responseCode = "400", description = "Bad request"),
+            @ApiResponse(responseCode = "404", description = "Task not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    ResponseEntity<?> getTask(@Parameter(description = "the uuid of the task") UUID uuid);
 }
