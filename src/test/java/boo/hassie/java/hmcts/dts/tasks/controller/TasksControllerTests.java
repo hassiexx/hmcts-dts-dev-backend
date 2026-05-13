@@ -1,0 +1,121 @@
+package boo.hassie.java.hmcts.dts.tasks.controller;
+
+import boo.hassie.java.hmcts.dts.tasks.dto.CreateTaskRequest;
+import boo.hassie.java.hmcts.dts.tasks.dto.TaskDTO;
+import boo.hassie.java.hmcts.dts.tasks.entity.Status;
+import boo.hassie.java.hmcts.dts.tasks.service.TasksService;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import tools.jackson.databind.PropertyNamingStrategies;
+import tools.jackson.databind.json.JsonMapper;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@ExtendWith(MockitoExtension.class)
+public class TasksControllerTests {
+    private static final String BASE_URL = "/tasks/";
+
+    private AutoCloseable closeableMocks;
+    private MockMvc mockMvc;
+    private JsonMapper mapper;
+
+    @InjectMocks
+    private TasksController tasksController;
+
+    @Mock
+    private TasksService tasksService;
+
+    @BeforeEach
+    public void setup() {
+        closeableMocks = MockitoAnnotations.openMocks(TasksControllerTests.class);
+        mapper = JsonMapper.builder()
+                .findAndAddModules()
+                .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                .build();
+        this.mockMvc = MockMvcBuilders.standaloneSetup(tasksController)
+                .setControllerAdvice(new ControllerExceptionHandler(mapper))
+                .setMessageConverters(new JacksonJsonHttpMessageConverter(mapper))
+                .build();
+    }
+
+    @AfterEach
+    public void teardown() throws Exception {
+        closeableMocks.close();
+    }
+
+    @Test
+    public void testCreateTask() throws Exception {
+        // Arrange
+        final var request = CreateTaskRequest.builder()
+                .title("Task title")
+                .description("Task description")
+                .dueAt(LocalDateTime.now().plusDays(10))
+                .build();
+
+        final var task = TaskDTO.builder()
+                .title("Task title")
+                .description("Task description")
+                .uuid(UUID.randomUUID())
+                .status(Status.TO_DO)
+                .dueAt(LocalDateTime.now().plusDays(10))
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        Mockito.when(tasksService.createTask(Mockito.any(CreateTaskRequest.class))).thenReturn(task);
+
+        // Act
+        final var result = mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(request)));
+
+        // Assert
+        result.andExpect(MockMvcResultMatchers.status().isCreated());
+        result.andExpect(MockMvcResultMatchers.content().string(mapper.writeValueAsString(task)));
+    }
+
+    @Test
+    public void testCreateTask_EmptyTitleAndDueDate() throws Exception {
+        final var request = new CreateTaskRequest();
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(request)));
+
+        result.andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Bad request")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details.length()", Matchers.is(2)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details[*].field",
+                        Matchers.containsInAnyOrder("title", "due_at")));
+    }
+
+    @Test
+    public void testCreateTask_DueDateInPast() throws Exception {
+        final var request = CreateTaskRequest.builder()
+                .title("Task title")
+                .description("Task description")
+                .dueAt(LocalDateTime.now().minusSeconds(1))
+                .build();
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(request)));
+
+        result.andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Bad request")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details.length()", Matchers.is(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details[0].field", Matchers.is("due_at")));
+    }
+}
