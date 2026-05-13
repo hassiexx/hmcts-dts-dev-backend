@@ -46,4 +46,13 @@ public class TasksController implements TasksOperations {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(task);
     }
+
+    @Override
+    @GetMapping(path = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> getTasks() {
+        final var tasks = tasksService.getTasks();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(tasks);
+    }
 }

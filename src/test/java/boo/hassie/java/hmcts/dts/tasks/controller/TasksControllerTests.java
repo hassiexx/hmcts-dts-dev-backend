@@ -17,12 +17,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import tools.jackson.databind.PropertyNamingStrategies;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,6 +52,7 @@ public class TasksControllerTests {
         this.mockMvc = MockMvcBuilders.standaloneSetup(tasksController)
                 .setControllerAdvice(new ControllerExceptionHandler(mapper))
                 .setMessageConverters(new JacksonJsonHttpMessageConverter(mapper))
+                .alwaysDo(MockMvcResultHandlers.print())
                 .build();
     }
 
@@ -198,5 +202,50 @@ public class TasksControllerTests {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error_details[0].param", Matchers.is("uuid")))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error_details[0].reason",
                         Matchers.is("Invalid UUID string: test123")));
+    }
+
+    @Test
+    public void testGetTasks() throws Exception {
+        final var tasks = List.of(
+                TaskDTO.builder()
+                        .uuid(UUID.randomUUID())
+                        .title("Task 1")
+                        .description("Task 1 description")
+                        .status(Status.IN_PROGRESS)
+                        .dueAt(LocalDateTime.now().plusDays(7))
+                        .updatedAt(LocalDateTime.now().minusDays(4))
+                        .build(),
+                TaskDTO.builder()
+                        .uuid(UUID.randomUUID())
+                        .title("Task 2")
+                        .description("Task 2 description")
+                        .status(Status.TO_DO)
+                        .dueAt(LocalDateTime.now().plusDays(10))
+                        .updatedAt(LocalDateTime.now().minusDays(2))
+                        .build()
+        );
+
+        Mockito.when(tasksService.getTasks()).thenReturn(tasks);
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL));
+
+        result.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.size()", Matchers.is(2)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[*].uuid",
+                        Matchers.containsInAnyOrder(tasks.get(0).getUuid().toString(), tasks.get(1).getUuid().toString())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[*].title",
+                        Matchers.containsInAnyOrder("Task 1", "Task 2")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.[*].status",
+                        Matchers.containsInAnyOrder("TO_DO", "IN_PROGRESS")));
+    }
+
+    @Test
+    public void testGetTasks_ZeroTasks() throws Exception {
+        Mockito.when(tasksService.getTasks()).thenReturn(new ArrayList<>());
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL));
+
+        result.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.size()", Matchers.is(0)));
     }
 }

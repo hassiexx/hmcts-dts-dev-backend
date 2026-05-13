@@ -29,10 +29,17 @@ public interface TasksOperations {
 
     @Operation(summary = "Get task", description = "Gets a task by UUID")
     @ApiResponses({
-            @ApiResponse(responseCode = "204", description = "Success"),
+            @ApiResponse(responseCode = "200", description = "Success"),
             @ApiResponse(responseCode = "400", description = "Bad request"),
             @ApiResponse(responseCode = "404", description = "Task not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     ResponseEntity<?> getTask(@Parameter(description = "the uuid of the task") UUID uuid);
+
+    @Operation(summary = "Get all tasks", description = "Gets all tasks as an array")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    ResponseEntity<?> getTasks();
 }
