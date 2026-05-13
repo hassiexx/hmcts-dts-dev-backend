@@ -4,14 +4,16 @@ import boo.hassie.java.hmcts.dts.tasks.dto.ErrorDetail;
 import boo.hassie.java.hmcts.dts.tasks.dto.ErrorResponse;
 import boo.hassie.java.hmcts.dts.tasks.exception.BadRequestException;
 import boo.hassie.java.hmcts.dts.tasks.exception.NotFoundException;
-import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
 
@@ -19,16 +21,35 @@ import java.util.List;
 public class ControllerExceptionHandler {
     private static final Logger logger = LoggerFactory.getLogger(ControllerExceptionHandler.class);
 
+    private final JsonMapper jsonMapper;
+
+    @Autowired
+    public ControllerExceptionHandler(final JsonMapper jsonMapper) {
+        this.jsonMapper = jsonMapper;
+    }
+
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequestEx(final BadRequestException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("Bad request", null));
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponse> handleConstraintViolationEx(final ConstraintViolationException ex) {
-        List<ErrorDetail> errorDetails = ex.getConstraintViolations().stream()
-                .map(v -> new ErrorDetail(v.getPropertyPath().toString(), v.getMessage()))
+//    @ExceptionHandler(ConstraintViolationException.class)
+//    public ResponseEntity<ErrorResponse> handleConstraintViolationEx(final ConstraintViolationException ex) {
+//        List<ErrorDetail> errorDetails = ex.getConstraintViolations().stream()
+//                .map(v -> new ErrorDetail(v.getPropertyPath().toString(), v.getMessage()))
+//                .toList();
+//
+//        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                .body(new ErrorResponse("Bad request", errorDetails));
+//    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidExEx(final MethodArgumentNotValidException ex) {
+        final var namingStrategy = jsonMapper.serializationConfig().getPropertyNamingStrategy();
+        final var errorDetails = ex.getFieldErrors().stream()
+                .map(e -> new ErrorDetail(namingStrategy.nameForField(null, null, e.getField()),
+                        e.getDefaultMessage()))
                 .toList();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
