@@ -8,10 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/tasks")
@@ -30,5 +29,13 @@ public class TasksController implements TasksOperations {
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(createdTask);
+    }
+
+    @Override
+    @DeleteMapping(path = "/{uuid}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> deleteTask(@PathVariable final UUID uuid) {
+        tasksService.deleteTask(uuid);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

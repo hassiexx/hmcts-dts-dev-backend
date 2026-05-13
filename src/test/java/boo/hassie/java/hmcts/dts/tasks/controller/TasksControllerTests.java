@@ -3,6 +3,7 @@ package boo.hassie.java.hmcts.dts.tasks.controller;
 import boo.hassie.java.hmcts.dts.tasks.dto.CreateTaskRequest;
 import boo.hassie.java.hmcts.dts.tasks.dto.TaskDTO;
 import boo.hassie.java.hmcts.dts.tasks.entity.Status;
+import boo.hassie.java.hmcts.dts.tasks.exception.NotFoundException;
 import boo.hassie.java.hmcts.dts.tasks.service.TasksService;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
@@ -74,7 +75,7 @@ public class TasksControllerTests {
                 .updatedAt(LocalDateTime.now())
                 .build();
 
-        Mockito.when(tasksService.createTask(Mockito.any(CreateTaskRequest.class))).thenReturn(task);
+        Mockito.when(tasksService.createTask(request)).thenReturn(task);
 
         // Act
         final var result = mockMvc.perform(MockMvcRequestBuilders.post(BASE_URL)
@@ -118,4 +119,54 @@ public class TasksControllerTests {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error_details.length()", Matchers.is(1)))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.error_details[0].field", Matchers.is("due_at")));
     }
+
+    @Test
+    public void testDeleteTask() throws Exception {
+        final UUID uuid = UUID.randomUUID();
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + uuid));
+
+        result.andExpect(MockMvcResultMatchers.status().isNoContent())
+                .andExpect(MockMvcResultMatchers.content().string(""));
+    }
+
+    @Test
+    public void testDeleteTask_TaskDoesNotExist() throws Exception {
+        final UUID uuid = UUID.randomUUID();
+        Mockito.doThrow(new NotFoundException("task not found")).when(tasksService).deleteTask(uuid);
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + uuid));
+
+        result.andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("task not found")));
+    }
+
+    @Test
+    public void testDeleteTask_InvalidUUID() throws Exception {
+        final var uuid = "test123";
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + uuid));
+
+        result.andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Bad request")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details.length()", Matchers.is(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details[0].param", Matchers.is("uuid")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details[0].reason",
+                        Matchers.is("Invalid UUID string: test123")));
+    }
+
+//    @Test
+//    public void testGetTask() throws Exception {
+//        final var task = TaskDTO.builder()
+//                .title("Task title")
+//                .description("Task description")
+//                .status(Status.COMPLETED)
+//                .dueAt(LocalDateTime.now().plusDays(1))
+//                .updatedAt(LocalDateTime.now().minusDays(1))
+//                        .build();
+//
+//        Mockito.when(tasksService.getTask(task.getUuid())).thenReturn(task);
+//
+//        final var result = mockMvc.perform()
+//    }
 }

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Builder
-@Getter
+@Data
 @NoArgsConstructor
 public class CreateTaskRequest {
     @NotBlank

@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -34,26 +35,24 @@ public class ControllerExceptionHandler {
                 .body(new ErrorResponse("Bad request", null));
     }
 
-//    @ExceptionHandler(ConstraintViolationException.class)
-//    public ResponseEntity<ErrorResponse> handleConstraintViolationEx(final ConstraintViolationException ex) {
-//        List<ErrorDetail> errorDetails = ex.getConstraintViolations().stream()
-//                .map(v -> new ErrorDetail(v.getPropertyPath().toString(), v.getMessage()))
-//                .toList();
-//
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                .body(new ErrorResponse("Bad request", errorDetails));
-//    }
-
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidExEx(final MethodArgumentNotValidException ex) {
         final var namingStrategy = jsonMapper.serializationConfig().getPropertyNamingStrategy();
         final var errorDetails = ex.getFieldErrors().stream()
                 .map(e -> new ErrorDetail(namingStrategy.nameForField(null, null, e.getField()),
-                        e.getDefaultMessage()))
+                        null, e.getDefaultMessage()))
                 .toList();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("Bad request", errorDetails));
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleMethodArgumentTypeMismatchEx(MethodArgumentTypeMismatchException ex) {
+        final var errorDetail = new ErrorDetail(null, ex.getName(), ex.getCause().getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("Bad request", List.of(errorDetail)));
     }
 
     @ExceptionHandler({NotFoundException.class, NoResourceFoundException.class})

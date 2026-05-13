@@ -48,7 +48,7 @@ public class TasksService {
      */
     public void deleteTask(final UUID uuid) {
         if (!tasksRepository.existsByUuid(uuid)) {
-            throw new NotFoundException();
+            throw new NotFoundException("task not found");
         }
 
         tasksRepository.deleteByUuid(uuid);
@@ -65,7 +65,7 @@ public class TasksService {
         final Task task = tasksRepository.findTaskByUuid(uuid);
 
         if (task == null) {
-            throw new NotFoundException();
+            throw new NotFoundException("task not found");
         }
 
         return TaskMapper.INSTANCE.toDTO(task);
@@ -100,7 +100,7 @@ public class TasksService {
         final var task = tasksRepository.findTaskByUuid(uuid);
 
         if (task == null) {
-            throw new NotFoundException();
+            throw new NotFoundException("task not found");
         }
 
         if (request.getTitle() != null && !request.getTitle().isEmpty()) {
