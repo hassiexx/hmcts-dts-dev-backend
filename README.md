@@ -13,6 +13,30 @@ This was developed as part of the coding challenge for the HMCTS DTS Developer r
 - **Build Tool**: Gradle
 - **API Documentation**: Swagger OpenAPI 3.0
 
+## Project Structure
+
+```
+src/
+├── main/
+│   ├── java/boo/hassie/java/hmcts/dts/tasks/
+│   │   ├── TasksApplication.java          # Main Spring Boot application
+│   │   ├── config/                        # Spring Boot configurations
+│   │   ├── controller/                    # REST controllers
+│   │   ├── dto/                           # Data transfer objects
+│   │   ├── entity/                        # JPA entities
+│   │   ├── exception/                     # Custom exceptions
+│   │   ├── mapper/                        # DTO and entity mappers
+│   │   ├── repository/                    # JPA repositories for data access
+│   │   ├── service/                       # Business logic
+│   │   └── validator/                     # Input validators
+│   └── resources/
+│       ├── application.yaml               # Application configuration
+│       └── db/migration/                  # Flyway database migrations
+│
+└── test/...                               # Unit tests
+```
+
+
 ## Prerequisites
 
 - **Java 25** or later
