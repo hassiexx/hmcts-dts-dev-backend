@@ -2,6 +2,7 @@ package boo.hassie.java.hmcts.dts.tasks.controller;
 
 import boo.hassie.java.hmcts.dts.tasks.dto.CreateTaskRequest;
 import boo.hassie.java.hmcts.dts.tasks.dto.TaskDTO;
+import boo.hassie.java.hmcts.dts.tasks.dto.UpdateTaskRequest;
 import boo.hassie.java.hmcts.dts.tasks.entity.Status;
 import boo.hassie.java.hmcts.dts.tasks.exception.NotFoundException;
 import boo.hassie.java.hmcts.dts.tasks.service.TasksService;
@@ -247,5 +248,67 @@ public class TasksControllerTests {
 
         result.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.size()", Matchers.is(0)));
+    }
+
+    @Test
+    public void testUpdateTask() throws Exception {
+        final var uuid = UUID.randomUUID();
+        final var request = UpdateTaskRequest.builder()
+                .title("New title")
+                .description("New desc")
+                .status(Status.COMPLETED)
+                .build();
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.patch(BASE_URL + uuid)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(request)));
+
+        result.andExpect(MockMvcResultMatchers.status().isNoContent());
+    }
+
+    @Test
+    public void testUpdateTask_EmptyTitle() throws Exception {
+        final var uuid = UUID.randomUUID();
+        final var request = UpdateTaskRequest.builder()
+                .title("")
+                .build();
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.patch(BASE_URL + uuid)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(request)));
+
+        result.andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Bad request")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details.size()", Matchers.is(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details[0].field", Matchers.is("title")));
+    }
+
+    @Test
+    public void testUpdateTask_TaskDoesNotExist() throws Exception {
+        final var uuid = UUID.randomUUID();
+        final var request = UpdateTaskRequest.builder()
+                .status(Status.COMPLETED)
+                .build();
+
+        Mockito.doThrow(new NotFoundException("task not found")).when(tasksService).updateTask(uuid, request);
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.patch(BASE_URL + uuid)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(request)));
+
+        result.andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("task not found")));
+    }
+
+    @Test
+    public void testUpdateTask_InvalidUUID() throws Exception {
+        final var uuid = "test123";
+
+        final var result = mockMvc.perform(MockMvcRequestBuilders.patch(BASE_URL + uuid));
+
+        result.andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Bad request")))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details.size()", Matchers.is(1)))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error_details[0].param", Matchers.is("uuid")));
     }
 }

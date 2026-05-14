@@ -1,6 +1,7 @@
 package boo.hassie.java.hmcts.dts.tasks.controller;
 
 import boo.hassie.java.hmcts.dts.tasks.dto.CreateTaskRequest;
+import boo.hassie.java.hmcts.dts.tasks.dto.UpdateTaskRequest;
 import boo.hassie.java.hmcts.dts.tasks.service.TasksService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,5 +55,14 @@ public class TasksController implements TasksOperations {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(tasks);
+    }
+
+    @Override
+    @PatchMapping(path = "/{uuid}")
+    public ResponseEntity<?> updateTask(@PathVariable final UUID uuid,
+                                        @RequestBody @Valid final UpdateTaskRequest request) {
+        tasksService.updateTask(uuid, request);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }
