@@ -1,4 +1,4 @@
-package boo.hassie.java.hmcts.dts.tasks.doc;
+package boo.hassie.java.hmcts.dts.tasks.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class SwaggerDocConfig {
+public class SwaggerConfig {
     @Bean
     public ModelResolver modelResolver() {
         final ObjectMapper copy = Json.mapper().copy();
