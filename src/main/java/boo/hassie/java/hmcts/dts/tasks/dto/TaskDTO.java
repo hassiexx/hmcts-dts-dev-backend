@@ -23,7 +23,7 @@ public class TaskDTO {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @Schema(description = "The description of the task if set")
     private String description;
-    @Schema(description = "A ISO 8601 datetime of when the task is due", example = "2026-05-14T18:17:00")
+    @Schema(description = "A ISO 8601 datetime of when the task is due")
     private LocalDateTime dueAt;
     @Schema(description = "The current status of the task")
     private Status status;
