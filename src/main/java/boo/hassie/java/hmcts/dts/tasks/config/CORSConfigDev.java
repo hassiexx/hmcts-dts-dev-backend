@@ -17,7 +17,7 @@ public class CORSConfigDev implements WebMvcConfigurer {
         registry.addMapping("/**")
                 .allowedOrigins("*")
                 .allowedMethods(HttpMethod.GET.name(), HttpMethod.POST.name(), HttpMethod.PUT.name(),
-                        HttpMethod.DELETE.name(), HttpMethod.OPTIONS.name())
+                        HttpMethod.PATCH.name(), HttpMethod.DELETE.name(), HttpMethod.OPTIONS.name())
                 .allowedHeaders("*")
                 .maxAge(3600);
     }
