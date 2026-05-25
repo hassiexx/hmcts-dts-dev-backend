@@ -61,7 +61,7 @@ psql -U postgres -c "CREATE DATABASE hmcts_tasks;"
 
 ### 3. Update application configuration (including database credentials) if needed
 
-See `src/main/resources/application.yaml`
+See `src/main/resources/application-dev.yaml`
 
 ### 4. Build the Project
 
@@ -78,7 +78,7 @@ gradlew.bat clean build
 ### 5. Run the Application
 
 ```bash
-./gradlew bootRun
+./gradlew bootRun --args='--spring.profiles.active=dev'
 ```
 
 The application will start on `http://localhost:8080` or whichever port is configured in application.yml

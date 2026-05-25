@@ -1,0 +1,16 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: tasks-api
+  datasource:
+    url: jdbc:postgresql://localhost:5432/hmcts_tasks?sslMode=disable
+    username: postgres
+    password: postgres
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
+springdoc:
+  swagger-ui:
+    path: /
