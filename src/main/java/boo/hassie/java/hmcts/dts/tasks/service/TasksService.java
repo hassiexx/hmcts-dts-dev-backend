@@ -47,7 +47,7 @@ public class TasksService {
      * @throws NotFoundException if the task was not found.
      */
     public void deleteTask(final UUID uuid) {
-        final Task task = tasksRepository.findTaskByUuid(uuid);
+        final Task task = tasksRepository.findByUuid(uuid);
         if (task == null) {
             throw new NotFoundException("task not found");
         }
@@ -63,7 +63,7 @@ public class TasksService {
      * @throws NotFoundException if the task was not found.
      */
     public TaskDTO getTask(final UUID uuid) {
-        final Task task = tasksRepository.findTaskByUuid(uuid);
+        final Task task = tasksRepository.findByUuid(uuid);
 
         if (task == null) {
             throw new NotFoundException("task not found");
@@ -98,7 +98,7 @@ public class TasksService {
             throw new BadRequestException();
         }
 
-        final var task = tasksRepository.findTaskByUuid(uuid);
+        final var task = tasksRepository.findByUuid(uuid);
 
         if (task == null) {
             throw new NotFoundException("task not found");

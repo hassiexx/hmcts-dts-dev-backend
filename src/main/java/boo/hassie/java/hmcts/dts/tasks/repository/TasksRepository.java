@@ -28,5 +28,5 @@ public interface TasksRepository extends CrudRepository<Task, Integer> {
      * @param uuid the UUID to find.
      * @return the task if found.
      */
-    Task findTaskByUuid(UUID uuid);
+    Task findByUuid(UUID uuid);
 }

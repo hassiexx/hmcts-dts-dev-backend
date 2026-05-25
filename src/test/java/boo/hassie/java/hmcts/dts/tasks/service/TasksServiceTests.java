@@ -65,7 +65,7 @@ public class TasksServiceTests {
     @Test
     public void testDeleteTask() {
         final var uuid = UUID.randomUUID();
-        Mockito.when(tasksRepository.findTaskByUuid(uuid)).thenReturn(new Task());
+        Mockito.when(tasksRepository.findByUuid(uuid)).thenReturn(new Task());
 
         Assertions.assertDoesNotThrow(() -> tasksService.deleteTask(uuid));
         Mockito.verify(tasksRepository, Mockito.times(1)).deleteByUuid(uuid);
@@ -74,7 +74,7 @@ public class TasksServiceTests {
     @Test
     public void testDeleteTask_TaskDoesNotExist() {
         final var uuid = UUID.randomUUID();
-        Mockito.when(tasksRepository.findTaskByUuid(uuid)).thenReturn(null);
+        Mockito.when(tasksRepository.findByUuid(uuid)).thenReturn(null);
 
         Assertions.assertThrows(NotFoundException.class, () -> tasksService.deleteTask(uuid));
     }
@@ -90,7 +90,7 @@ public class TasksServiceTests {
         task.setStatus(Status.IN_PROGRESS);
         task.setUpdatedAt(now.minusDays(1));
 
-        Mockito.when(tasksRepository.findTaskByUuid(task.getUuid())).thenReturn(task);
+        Mockito.when(tasksRepository.findByUuid(task.getUuid())).thenReturn(task);
 
         // Act.
         AtomicReference<TaskDTO> foundTaskAtomic = new AtomicReference<>();
@@ -112,7 +112,7 @@ public class TasksServiceTests {
     public void testGetTask_TaskDoesNotExist() {
         final var uuid = UUID.randomUUID();
 
-        Mockito.when(tasksRepository.findTaskByUuid(uuid)).thenReturn(null);
+        Mockito.when(tasksRepository.findByUuid(uuid)).thenReturn(null);
 
         Assertions.assertThrows(NotFoundException.class, () -> tasksService.getTask(uuid));
     }
@@ -162,7 +162,7 @@ public class TasksServiceTests {
         task.setTitle("Task title");
         task.setDescription("Example task description");
 
-        Mockito.when(tasksRepository.findTaskByUuid(task.getUuid())).thenReturn(task);
+        Mockito.when(tasksRepository.findByUuid(task.getUuid())).thenReturn(task);
 
         // Act
         final UpdateTaskRequest request = UpdateTaskRequest.builder()
@@ -190,7 +190,7 @@ public class TasksServiceTests {
         task.setTitle("Task title");
         task.setDescription("Example task description");
 
-        Mockito.when(tasksRepository.findTaskByUuid(task.getUuid())).thenReturn(task);
+        Mockito.when(tasksRepository.findByUuid(task.getUuid())).thenReturn(task);
 
         // Act
         final var request = UpdateTaskRequest.builder()
@@ -216,7 +216,7 @@ public class TasksServiceTests {
                 .title("New title")
                 .build();
 
-        Mockito.when(tasksRepository.findTaskByUuid(uuid)).thenReturn(null);
+        Mockito.when(tasksRepository.findByUuid(uuid)).thenReturn(null);
 
         Assertions.assertThrows(NotFoundException.class, () -> tasksService.updateTask(uuid, request));
     }
