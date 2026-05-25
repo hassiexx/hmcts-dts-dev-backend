@@ -65,7 +65,7 @@ public class TasksServiceTests {
     @Test
     public void testDeleteTask() {
         final var uuid = UUID.randomUUID();
-        Mockito.when(tasksRepository.existsByUuid(uuid)).thenReturn(true);
+        Mockito.when(tasksRepository.findTaskByUuid(uuid)).thenReturn(new Task());
 
         Assertions.assertDoesNotThrow(() -> tasksService.deleteTask(uuid));
         Mockito.verify(tasksRepository, Mockito.times(1)).deleteByUuid(uuid);
@@ -74,7 +74,7 @@ public class TasksServiceTests {
     @Test
     public void testDeleteTask_TaskDoesNotExist() {
         final var uuid = UUID.randomUUID();
-        Mockito.when(tasksRepository.existsByUuid(uuid)).thenReturn(false);
+        Mockito.when(tasksRepository.findTaskByUuid(uuid)).thenReturn(null);
 
         Assertions.assertThrows(NotFoundException.class, () -> tasksService.deleteTask(uuid));
     }

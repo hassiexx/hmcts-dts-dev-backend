@@ -1,12 +1,9 @@
 package boo.hassie.java.hmcts.dts.tasks.repository;
 
 import boo.hassie.java.hmcts.dts.tasks.entity.Task;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Repository
@@ -17,13 +14,6 @@ public interface TasksRepository extends CrudRepository<Task, Integer> {
      * @param uuid the UUID to find.
      */
     void deleteByUuid(UUID uuid);
-
-    /**
-     * Returns whether a task exists by UUID.
-     *
-     * @param uuid the UUID to find.
-     */
-    boolean existsByUuid(UUID uuid);
 
     /**
      * Finds all tasks ordered by created at.
