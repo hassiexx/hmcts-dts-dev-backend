@@ -64,11 +64,11 @@ public class TasksServiceTests {
 
     @Test
     public void testDeleteTask() {
-        final var uuid = UUID.randomUUID();
-        Mockito.when(tasksRepository.findByUuid(uuid)).thenReturn(new Task());
+        final var task = new Task();
+        Mockito.when(tasksRepository.findByUuid(task.getUuid())).thenReturn(task);
 
-        Assertions.assertDoesNotThrow(() -> tasksService.deleteTask(uuid));
-        Mockito.verify(tasksRepository, Mockito.times(1)).deleteByUuid(uuid);
+        Assertions.assertDoesNotThrow(() -> tasksService.deleteTask(task.getUuid()));
+        Mockito.verify(tasksRepository, Mockito.times(1)).delete(task);
     }
 
     @Test

@@ -52,7 +52,7 @@ public class TasksService {
             throw new NotFoundException("task not found");
         }
 
-        tasksRepository.deleteByUuid(uuid);
+        tasksRepository.delete(task);
     }
 
     /**
