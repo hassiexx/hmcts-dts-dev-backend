@@ -31,7 +31,7 @@ import java.util.UUID;
 
 @ExtendWith(MockitoExtension.class)
 public class TasksControllerTests {
-    private static final String BASE_URL = "/tasks/";
+    private static final String BASE_URL = "/tasks";
 
     private AutoCloseable closeableMocks;
     private MockMvc mockMvc;
@@ -129,7 +129,7 @@ public class TasksControllerTests {
     public void testDeleteTask() throws Exception {
         final UUID uuid = UUID.randomUUID();
 
-        final var result = mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + uuid));
+        final var result = mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + uuid));
 
         result.andExpect(MockMvcResultMatchers.status().isNoContent())
                 .andExpect(MockMvcResultMatchers.content().string(""));
@@ -140,7 +140,7 @@ public class TasksControllerTests {
         final UUID uuid = UUID.randomUUID();
         Mockito.doThrow(new NotFoundException("task not found")).when(tasksService).deleteTask(uuid);
 
-        final var result = mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + uuid));
+        final var result = mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + uuid));
 
         result.andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("task not found")));
@@ -150,7 +150,7 @@ public class TasksControllerTests {
     public void testDeleteTask_InvalidUUID() throws Exception {
         final var uuid = "test123";
 
-        final var result = mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + uuid));
+        final var result = mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/" + uuid));
 
         result.andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Bad request")))
@@ -173,7 +173,7 @@ public class TasksControllerTests {
 
         Mockito.when(tasksService.getTask(task.getUuid())).thenReturn(task);
 
-        final var result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + task.getUuid()));
+        final var result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/" + task.getUuid()));
 
         result.andExpect(MockMvcResultMatchers.status().isOk());
         Assertions.assertEquals(task,
@@ -185,7 +185,7 @@ public class TasksControllerTests {
         final UUID uuid = UUID.randomUUID();
         Mockito.doThrow(new NotFoundException("task not found")).when(tasksService).getTask(uuid);
 
-        final var result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + uuid));
+        final var result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/" + uuid));
 
         result.andExpect(MockMvcResultMatchers.status().isNotFound())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("task not found")));
@@ -195,7 +195,7 @@ public class TasksControllerTests {
     public void testGetTask_InvalidUUID() throws Exception {
         final var uuid = "test123";
 
-        final var result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + uuid));
+        final var result = mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL + "/" + uuid));
 
         result.andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Bad request")))
@@ -259,7 +259,7 @@ public class TasksControllerTests {
                 .status(Status.COMPLETED)
                 .build();
 
-        final var result = mockMvc.perform(MockMvcRequestBuilders.patch(BASE_URL + uuid)
+        final var result = mockMvc.perform(MockMvcRequestBuilders.patch(BASE_URL + "/" + uuid)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)));
 
@@ -273,7 +273,7 @@ public class TasksControllerTests {
                 .title("")
                 .build();
 
-        final var result = mockMvc.perform(MockMvcRequestBuilders.patch(BASE_URL + uuid)
+        final var result = mockMvc.perform(MockMvcRequestBuilders.patch(BASE_URL + "/" + uuid)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)));
 
@@ -292,7 +292,7 @@ public class TasksControllerTests {
 
         Mockito.doThrow(new NotFoundException("task not found")).when(tasksService).updateTask(uuid, request);
 
-        final var result = mockMvc.perform(MockMvcRequestBuilders.patch(BASE_URL + uuid)
+        final var result = mockMvc.perform(MockMvcRequestBuilders.patch(BASE_URL + "/" + uuid)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(mapper.writeValueAsString(request)));
 
@@ -304,7 +304,7 @@ public class TasksControllerTests {
     public void testUpdateTask_InvalidUUID() throws Exception {
         final var uuid = "test123";
 
-        final var result = mockMvc.perform(MockMvcRequestBuilders.patch(BASE_URL + uuid));
+        final var result = mockMvc.perform(MockMvcRequestBuilders.patch(BASE_URL + "/" + uuid));
 
         result.andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message", Matchers.is("Bad request")))

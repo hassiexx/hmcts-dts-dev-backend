@@ -23,7 +23,7 @@ public class TasksController implements TasksOperations {
     }
 
     @Override
-    @PostMapping(path = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> createTask(@RequestBody @Valid final CreateTaskRequest request) {
         final var createdTask = tasksService.createTask(request);
 
@@ -49,7 +49,7 @@ public class TasksController implements TasksOperations {
     }
 
     @Override
-    @GetMapping(path = "/", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<?> getTasks() {
         final var tasks = tasksService.getTasks();
 
