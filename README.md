@@ -1,4 +1,5 @@
 # HMCTS DTS Developer - Backend Tasks API
+[![CI](https://github.com/hassiexx/hmcts-dts-dev-backend/actions/workflows/ci.yml/badge.svg)](https://github.com/hassiexx/hmcts-dts-dev-backend/actions/workflows/ci.yml)
 
 A Spring Boot REST API for managing tasks. This backend service provides CRUD operations for task management with database persistence using PostgreSQL.
 
@@ -96,3 +97,6 @@ http://localhost:8080/
 ```bash
 ./gradlew test
 ```
+
+## License
+MIT License
